@@ -41,7 +41,7 @@ login_manager.login_view = 'login'
 
 # Database Models
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'users'  # Explicit table name
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(120), nullable=False)
@@ -64,10 +64,8 @@ class Job(db.Model):
     payment_method = db.Column(db.String(20), nullable=False, default='Cash')  # 'Cash' or 'Transfer'
     date_time = db.Column(db.DateTime, nullable=False, default=datetime.now)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
-    # Relationships
-    items = db.relationship('JobItem', backref='job', lazy=True, cascade='all, delete-orphan')
     creator = db.relationship('User', backref='jobs')
+    items = db.relationship('JobItem', backref='job', lazy=True, cascade='all, delete-orphan')
     
     @property
     def total_amount(self):
@@ -91,8 +89,6 @@ class Expenditure(db.Model):
     total = db.Column(db.Float, nullable=False)
     date_time = db.Column(db.DateTime, nullable=False, default=datetime.now)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
-    # Relationships
     creator = db.relationship('User', backref='expenditures')
 
 @login_manager.user_loader
@@ -113,8 +109,9 @@ def admin_required(f):
 from routes import *
 
 if __name__ == '__main__':
+    # In your app.py (lines 116-117)
     with app.app_context():
-        db.create_all()
+        db.create_all()  # Creates all tables defined in models
         
         # Create demo users if they don't exist
         if not User.query.filter_by(username='admin').first():

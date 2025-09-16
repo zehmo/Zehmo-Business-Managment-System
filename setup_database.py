@@ -15,7 +15,7 @@ def create_database():
     """Create all database tables"""
     with app.app_context():
         print("Creating database tables...")
-        db.create_all()
+        db.create_all()  # SQLAlchemy creates tables based on models
         print("✅ Database tables created successfully!")
 
 def create_default_users():
