@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Zehmo - Business Management System{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='70' font-family='Arial,sans-serif' font-size='60' font-weight='bold' text-anchor='middle' fill='%23dc3545'%3EZ%3C/text%3E%3C/svg%3E">
+    <meta name="theme-color" content="#dc3545">
+    <style>
+        /* Zehmo Brand Colors - Simplified red theme */
+        :root {
+            --zehmo-primary: #dc3545;
+            --zehmo-secondary: #dc3545;
+            --zehmo-accent: #dc3545;
+            --zehmo-purple: #dc3545;
+            --zehmo-gradient: #dc3545;
+            --zehmo-gradient-alt: #dc3545;
+            --zehmo-light: #ffffff;
+            --zehmo-dark: #343a40;
+        }
+
+        /* Custom Zehmo Navbar */
+        .navbar-zehmo {
+            background: var(--zehmo-primary) !important;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .navbar-brand .zehmo-logo {
+            background: var(--zehmo-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            font-size: 1.8rem;
+        }
+
+        /* Status highlights */
+        .today-highlight {
+            background: linear-gradient(135deg, var(--zehmo-light), #FFF3E0) !important;
+            border-left: 4px solid var(--zehmo-primary) !important;
+        }
+        .incomplete-job {
+            background: linear-gradient(135deg, #FFEBEE, #FFF8E1) !important;
+            border-left: 4px solid var(--zehmo-secondary) !important;
+        }
+
+        /* Enhanced cards */
+        .card {
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.1);
+            border: 1px solid rgba(233, 30, 99, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Zehmo-themed buttons */
+        .btn-primary {
+            background: var(--zehmo-gradient);
+            border: none;
+            box-shadow: 0 2px 8px rgba(233, 30, 99, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--zehmo-dark) 0%, #D84315 50%, #FF8F00 100%);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--zehmo-primary), var(--zehmo-secondary));
+            border: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50, var(--zehmo-accent));
+            border: none;
+        }
+
+        /* Table styling */
+        .table th {
+            background: linear-gradient(135deg, var(--zehmo-light), #FFF8E1);
+            border-top: none;
+            color: var(--zehmo-dark);
+            font-weight: 600;
+        }
+
+        /* Modal headers */
+        .modal-header {
+            background: var(--zehmo-gradient);
+            color: white;
+            border-bottom: none;
+        }
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        /* Alert styling */
+        .alert {
+            border: none;
+            border-radius: 0.5rem;
+            border-left: 4px solid;
+        }
+        .alert-success {
+            border-left-color: #4CAF50;
+            background: linear-gradient(135deg, #E8F5E8, #FFF8E1);
+        }
+        .alert-danger {
+            border-left-color: var(--zehmo-primary);
+            background: linear-gradient(135deg, #FFEBEE, #FFF3E0);
+        }
+
+        /* Stats cards */
+        .stats-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.15);
+        }
+        .stats-card.border-left-success {
+            border-left-color: #4CAF50 !important;
+        }
+        .stats-card.border-left-primary {
+            border-left-color: var(--zehmo-primary) !important;
+        }
+        .stats-card.border-left-warning {
+            border-left-color: var(--zehmo-accent) !important;
+        }
+        .stats-card.border-left-info {
+            border-left-color: var(--zehmo-secondary) !important;
+        }
+
+        /* Dynamic form rows */
+        .dynamic-row {
+            border: 2px solid rgba(233, 30, 99, 0.1);
+            border-radius: 0.5rem;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #FAFAFA, var(--zehmo-light));
+            transition: all 0.2s ease;
+        }
+        .dynamic-row:hover {
+            border-color: rgba(233, 30, 99, 0.3);
+        }
+
+        .remove-row {
+            background: var(--zehmo-primary);
+            border-color: var(--zehmo-primary);
+            color: white;
+        }
+        .add-row {
+            background: linear-gradient(135deg, #4CAF50, var(--zehmo-accent));
+            border: none;
+            color: white;
+        }
+
+        /* Footer styling */
+        .footer-zehmo {
+            background: var(--zehmo-gradient);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--zehmo-gradient);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--zehmo-primary);
+        }
+    </style>
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-zehmo">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <span class="zehmo-logo">Z</span> Zehmo Job Management
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'dashboard' }}" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'jobs' }}" href="{{ url_for('jobs') }}">
+                            <i class="fas fa-briefcase me-1"></i>All Jobs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'expenditures' }}" href="{{ url_for('expenditures') }}">
+                            <i class="fas fa-shopping-cart me-1"></i>Expenditures
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'reports' }}" href="{{ url_for('reports') }}">
+                            <i class="fas fa-chart-bar me-1"></i>Reports
+                        </a>
+                    </li>
+                    {% if current_user.is_admin() %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'users' }}" href="{{ url_for('users') }}">
+                            <i class="fas fa-users me-1"></i>Users
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ current_user.username }}
+                            {% if current_user.is_admin() %}
+                                <span class="badge bg-warning text-dark ms-1">Admin</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('change_password') }}">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Zehmo Footer -->
+    <footer class="footer-zehmo text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h5><span class="zehmo-logo">Z</span> Zehmo</h5>
+                    <p class="mb-0">Professional Job Management System</p>
+                    <small>&copy; 2024 Zehmo. All rights reserved.</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Auto-calculate totals in dynamic forms
+        function calculateTotal(row) {
+            const quantity = parseFloat(row.find('.quantity').val()) || 0;
+            const price = parseFloat(row.find('.price').val()) || 0;
+            const total = quantity * price;
+            row.find('.total').val(total.toFixed(2));
+        }
+
+        // Add new row to dynamic forms
+        function addRow(containerId, templateId) {
+            const container = $('#' + containerId);
+            const template = $('#' + templateId).html();
+            const newRow = $(template);
+            container.append(newRow);
+            
+            // Bind events to new row
+            newRow.find('.quantity, .price').on('input', function() {
+                calculateTotal(newRow);
+            });
+            
+            newRow.find('.remove-row').on('click', function() {
+                newRow.remove();
+            });
+        }
+
+        // Initialize dynamic form events
+        $(document).ready(function() {
+            // Bind calculation events
+            $(document).on('input', '.quantity, .price, .amount-used', function() {
+                const row = $(this).closest('.dynamic-row, tr');
+                if (row.find('.quantity').length && row.find('.price').length) {
+                    calculateTotal(row);
+                } else if (row.find('.quantity').length && row.find('.amount-used').length) {
+                    const quantity = parseFloat(row.find('.quantity').val()) || 0;
+                    const amountUsed = parseFloat(row.find('.amount-used').val()) || 0;
+                    const total = quantity * amountUsed;
+                    row.find('.total').val(total.toFixed(2));
+                }
+            });
+            
+            // Bind remove row events
+            $(document).on('click', '.remove-row', function() {
+                $(this).closest('.dynamic-row').remove();
+            });
+        });
+
+        // Form validation
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return false;
+            }
+            return true;
+        }
+
+        // Confirm delete actions
+        function confirmDelete(message) {
+            return confirm(message || 'Are you sure you want to delete this item?');
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

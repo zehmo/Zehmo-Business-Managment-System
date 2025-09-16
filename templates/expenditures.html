@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Expenditures - Zehmo Job Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+        <i class="fas fa-shopping-cart me-2 text-danger"></i>Expenditures
+    </h1>
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addExpenditureModal">
+        <i class="fas fa-plus me-2"></i>Add Expenditure
+    </button>
+</div>
+
+<!-- Filter Buttons -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="btn-group" role="group" aria-label="Filter expenditures">
+            <a href="{{ url_for('expenditures', filter='today') }}" class="btn btn-{{ 'danger' if filter_type == 'today' else 'outline-danger' }}">
+                <i class="fas fa-calendar-day me-1"></i>Today
+            </a>
+            <a href="{{ url_for('expenditures', filter='week') }}" class="btn btn-{{ 'danger' if filter_type == 'week' else 'outline-danger' }}">
+                <i class="fas fa-calendar-week me-1"></i>This Week
+            </a>
+            <a href="{{ url_for('expenditures', filter='month') }}" class="btn btn-{{ 'danger' if filter_type == 'month' else 'outline-danger' }}">
+                <i class="fas fa-calendar-alt me-1"></i>This Month
+            </a>
+            <a href="{{ url_for('expenditures', filter='all') }}" class="btn btn-{{ 'danger' if filter_type == 'all' else 'outline-danger' }}">
+                <i class="fas fa-list me-1"></i>All
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Card -->
+{% if expenditures %}
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h5 class="text-danger">Total Expenditures</h5>
+                    <h3 class="mb-0">₦{{ "%.2f"|format(expenditures|sum(attribute='total')) }}</h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h5 class="text-info">Number of Entries</h5>
+                    <h3 class="mb-0">{{ expenditures|length }}</h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h5 class="text-warning">Average Amount</h5>
+                    <h3 class="mb-0">₦{{ "%.2f"|format((expenditures|sum(attribute='total')) / (expenditures|length)) if expenditures|length > 0 else "0.00" }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Expenditures Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-table me-2"></i>Expenditures List
+            <span class="badge bg-secondary ms-2">{{ expenditures|length }} entries</span>
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if expenditures %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="expendituresTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Amount Used</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                            <th>Created By</th>
+                            {% if current_user.is_admin() %}
+                                <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expenditure in expenditures %}
+                            <tr class="{% if expenditure.date_time.date() == today %}today-highlight{% endif %}">
+                                <td>{{ expenditure.id }}</td>
+                                <td>{{ expenditure.description }}</td>
+                                <td>{{ expenditure.quantity|int }}</td>
+                                <td>₦{{ "%.2f"|format(expenditure.amount_used) }}</td>
+                                <td class="fw-bold text-danger">₦{{ "%.2f"|format(expenditure.total) }}</td>
+                                <td>{{ expenditure.date_time.strftime('%Y-%m-%d %I:%M %p') }}</td>
+                                <td>{{ expenditure.creator.username }}</td>
+                                {% if current_user.is_admin() %}
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-warning me-1" onclick="editExpenditure({{ expenditure.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form method="POST" action="{{ url_for('delete_expenditure', expenditure_id=expenditure.id) }}" class="d-inline" onsubmit="return confirmDelete('Are you sure you want to delete this expenditure?')">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                <p>No expenditures found for the selected filter.</p>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addExpenditureModal">
+                    <i class="fas fa-plus me-2"></i>Add Your First Expenditure
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Expenditure Modal -->
+<div class="modal fade" id="addExpenditureModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Add New Expenditure
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_expenditure') }}" id="addExpenditureForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description/Purpose</label>
+                        <input type="text" class="form-control" id="description" name="description" required>
+                        <div class="form-text">Describe what this expenditure is for</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control quantity" id="quantity" name="quantity" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="amount_used" class="form-label">Amount Used (Unit Cost)</label>
+                            <input type="number" class="form-control amount-used" id="amount_used" name="amount_used" step="0.01" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label for="total" class="form-label">Total Amount</label>
+                        <input type="number" class="form-control total" id="total" readonly>
+                        <div class="form-text">Automatically calculated: Quantity × Amount Used</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-save me-2"></i>Save Expenditure
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Expenditure Modal -->
+<div class="modal fade" id="editExpenditureModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Edit Expenditure
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="editExpenditureForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">Description/Purpose</label>
+                        <input type="text" class="form-control" id="edit_description" name="description" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="edit_quantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control quantity" id="edit_quantity" name="quantity" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_amount_used" class="form-label">Amount Used (Unit Cost)</label>
+                            <input type="number" class="form-control amount-used" id="edit_amount_used" name="amount_used" step="0.01" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label for="edit_total" class="form-label">Total Amount</label>
+                        <input type="number" class="form-control total" id="edit_total" readonly>
+                        <div class="form-text">Automatically calculated: Quantity × Amount Used</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-save me-2"></i>Update Expenditure
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function editExpenditure(expenditureId) {
+        fetch(`/get_expenditure/${expenditureId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('edit_description').value = data.description;
+                document.getElementById('edit_quantity').value = data.quantity;
+                document.getElementById('edit_amount_used').value = data.amount_used;
+                document.getElementById('edit_total').value = data.total.toFixed(2);
+                document.getElementById('editExpenditureForm').action = `/edit_expenditure/${expenditureId}`;
+                
+                // Show modal
+                new bootstrap.Modal(document.getElementById('editExpenditureModal')).show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error loading expenditure data');
+            });
+    }
+    
+    // Initialize DataTable if available
+    $(document).ready(function() {
+        if ($.fn.DataTable) {
+            $('#expendituresTable').DataTable({
+                "order": [[ 5, "desc" ]], // Sort by date descending
+                "pageLength": 25,
+                "responsive": true,
+                "columnDefs": [
+                    { "orderable": false, "targets": -1 } // Disable sorting on actions column
+                ]
+            });
+        }
+    });
+</script>
+
+<!-- Include DataTables for enhanced table functionality -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+{% endblock %}

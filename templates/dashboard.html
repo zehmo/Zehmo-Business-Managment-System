@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Zehmo Job Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+        <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+    </h1>
+    <div class="text-muted">
+        <i class="fas fa-calendar-alt me-1"></i>
+        {{ moment().format('MMMM DD, YYYY') if moment else datetime.now().strftime('%B %d, %Y') }}
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-2-4 col-md-6 mb-4">
+        <div class="card stats-card border-left-primary h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Jobs Today
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ jobs_today }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-briefcase fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2-4 col-md-6 mb-4">
+        <div class="card stats-card border-left-success h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Jobs Completed Today
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ jobs_today_completed }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2-4 col-md-6 mb-4">
+        <div class="card stats-card border-left-warning h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Incomplete Jobs
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ incomplete_jobs }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2-4 col-md-6 mb-4">
+        <div class="card stats-card border-left-info h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Jobs This Week
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ jobs_week }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-week fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2-4 col-md-6 mb-4">
+        <div class="card stats-card border-left-secondary h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                            Jobs This Month
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ jobs_month }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-alt fa-2x text-secondary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Overview -->
+<div class="row mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card stats-card border-left-danger h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Expenditures Today
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">₦{{ "%.2f"|format(expenditures_today) }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-shopping-cart fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card stats-card border-left-success h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Revenue This Month
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">₦{{ "%.2f"|format(revenue_month) }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-coins fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card stats-card border-left-{{ 'success' if net_balance >= 0 else 'danger' }} h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-{{ 'success' if net_balance >= 0 else 'danger' }} text-uppercase mb-1">
+                            Net Balance (Month)
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            ₦{{ "%.2f"|format(net_balance) }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-{{ 'chart-line' if net_balance >= 0 else 'chart-line-down' }} fa-2x text-{{ 'success' if net_balance >= 0 else 'danger' }}"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Chart -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Monthly Revenue vs Expenditures
+                </h5>
+                <div class="text-muted small">
+                    Last 6 Months
+                </div>
+            </div>
+            <div class="card-body">
+                {% if chart_data %}
+                    <div class="text-center">
+                        <img src="data:image/png;base64,{{ chart_data }}" class="img-fluid" alt="Monthly Chart" style="max-height: 400px;">
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                        <p>No data available for chart generation</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('jobs') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-2"></i>Add New Job
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('expenditures') }}" class="btn btn-danger w-100">
+                            <i class="fas fa-shopping-cart me-2"></i>Add Expenditure
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('reports') }}" class="btn btn-info w-100">
+                            <i class="fas fa-file-export me-2"></i>Generate Report
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('jobs', filter='today') }}" class="btn btn-success w-100">
+                            <i class="fas fa-list me-2"></i>Today's Jobs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.col-lg-2-4 {
+    flex: 0 0 20%;
+    max-width: 20%;
+}
+@media (max-width: 991.98px) {
+    .col-lg-2-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+.border-left-primary {
+    border-left: 0.25rem solid #dc3545 !important;
+}
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+.border-left-danger {
+    border-left: 0.25rem solid #e74a3b !important;
+}
+.border-left-secondary {
+    border-left: 0.25rem solid #6c757d !important;
+}
+.text-xs {
+    font-size: 0.7rem;
+}
+.font-weight-bold {
+    font-weight: 700 !important;
+}
+.text-gray-800 {
+    color: #5a5c69 !important;
+}
+</style>
+{% endblock %}
