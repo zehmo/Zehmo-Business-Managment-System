@@ -61,13 +61,13 @@ def main():
     print("🚀 Starting database setup for production...")
     print(f"Database URL: {os.environ.get('DATABASE_URL', 'Not set')}")
     
-    # Test connection first
+    # Create tables first
+    create_database()
+    
+    # Test connection after tables are created
     if not test_connection():
         print("\n❌ Please check your database configuration in .env file")
         return
-    
-    # Create tables
-    create_database()
     
     # Create default users
     create_default_users()

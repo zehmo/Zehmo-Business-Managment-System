@@ -44,7 +44,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'  # Explicit table name
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(120), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='normal')  # 'normal' or 'admin'
     
     def set_password(self, password):
